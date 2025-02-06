@@ -1,0 +1,9 @@
+# Ignore Cabal build artifacts
+dist/
+dist-newstyle/
+.cabal-sandbox/
+cabal.sandbox.config
+
+# Ignore compiled files
+*.hi
+*.o
