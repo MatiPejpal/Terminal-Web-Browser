@@ -1,13 +1,8 @@
 module HtmlTree where
 
-import Control.Arrow ((&&&), Arrow (second))
+import Control.Arrow ((&&&))
 import Data.Char (isSpace)
 import Data.List.Split
-
--- to do:
--- turn uses of head and tail into safe head and tail
--- check for other empty list errors
--- delete Text nodes with only white space
 
 data HtmlTree
     = Text { content :: String }
@@ -49,7 +44,7 @@ parseAttrList [_] = []
 parseAttrList (x:y:zs) = TagAttr (removeFirstLast x) y : parseAttrList zs
 
 removeFirstLast :: String -> String
-removeFirstLast = tail . init 
+removeFirstLast = tail . init
 
 -- takes html text, children accumulator, text accumulator
 -- returns a tuple of (list of children, remaining html text)

@@ -5,17 +5,8 @@ import qualified Network.HTTP.Simple as S
 import Network.HTTP.Client.TLS 
 import Network.HTTP.Client
 import qualified Data.ByteString.Lazy.Char8 as L8
-import System.Console.ANSI (setSGR, SGR(..), Color(..), ColorIntensity(..), ConsoleLayer(Foreground))
 import System.IO (hFlush, stdout)
 import HtmlTree
-
--- Function to format and display text in the terminal
-displayText :: String -> IO ()
-displayText text = do
-    setSGR [SetColor Foreground Vivid Blue]  -- Set text color to blue
-    putStrLn "=== Extracted Text ==="
-    setSGR [Reset]  -- Reset text color
-    putStrLn text
 
 -- Function that prints html tree
 indent :: Int -> String
@@ -50,4 +41,3 @@ main = do
     let html = L8.unpack $ S.getResponseBody response
     putStrLn "=== Tree ==="
     printHtml $ createTree html
-
