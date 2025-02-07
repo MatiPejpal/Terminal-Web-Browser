@@ -6,6 +6,7 @@ import Network.HTTP.Client.TLS
 import Network.HTTP.Client
 import System.IO (hFlush, stdout)
 import HtmlTree
+import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as LBS
 
@@ -19,15 +20,19 @@ printAttr (TagAttr name val) = name ++ "=\"" ++ val ++ "\""
 printAttrs :: [TagAttr] -> String
 printAttrs attrs = if null attrs then "" else " " ++ unwords (map printAttr attrs)
 
-printHtmlTree :: Int -> HtmlTree -> String
-printHtmlTree level (Text content) = indent level ++ "Text: " ++ content ++ "\n"
+printHtmlTree :: Int -> HtmlTree -> IO ()
+printHtmlTree level (Text content) = do 
+    putStr $ indent level ++ "Text: " 
+    LBS.putStr $ TE.encodeUtf8 $  T.pack content 
+    putStr "\n"
 printHtmlTree level (HtmlTag tagType attrs children) =
     let openingTag = tagType ++ printAttrs attrs
-        childrenStr = concatMap (printHtmlTree (level + 1)) children
-    in indent level ++ openingTag ++ "\n" ++ childrenStr ++ indent level ++ "\n"
+    in do 
+        putStrLn $ indent level ++ openingTag
+        mapM_ (printHtmlTree (level + 1)) children
 
 printHtml :: HtmlTree -> IO ()
-printHtml tree = putStr (printHtmlTree 0 tree)
+printHtml = printHtmlTree 0
 
 main :: IO ()
 main = do
