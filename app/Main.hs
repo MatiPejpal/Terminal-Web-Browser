@@ -4,9 +4,10 @@ module Main where
 import qualified Network.HTTP.Simple as S
 import Network.HTTP.Client.TLS 
 import Network.HTTP.Client
-import qualified Data.ByteString.Lazy.Char8 as L8
 import System.IO (hFlush, stdout)
 import HtmlTree
+import qualified Data.Text.Encoding as TE
+import qualified Data.ByteString as LBS
 
 -- Function that prints html tree
 indent :: Int -> String
@@ -38,6 +39,8 @@ main = do
     manager <- newManager tlsManagerSettings
     request <- parseRequest url
     response <- httpLbs request manager
-    let html = L8.unpack $ S.getResponseBody response
-    putStrLn "=== Tree ==="
-    printHtml $ createTree html
+    let html = TE.decodeUtf8 $ LBS.toStrict $ S.getResponseBody response
+    putStr $ show html
+    --
+    --putStrLn "=== Tree ==="
+    --printHtml $ createTree html

@@ -7,3 +7,6 @@ cabal.sandbox.config
 # Ignore compiled files
 *.hi
 *.o
+
+# Ignore Copies
+.Copy*

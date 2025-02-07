@@ -78,7 +78,8 @@ executable TerminalWebBrowser
                       http-client-tls,
                       http-types,
                       http-conduit,
-                      split
+                      split,
+                      text
 
     -- Directories containing source files.
     hs-source-dirs:   app
