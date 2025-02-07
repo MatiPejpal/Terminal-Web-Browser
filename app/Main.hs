@@ -9,6 +9,8 @@ import HtmlTree
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as LBS
+import Data.Char (chr, isDigit)
+import Numeric (readDec)
 
 -- Function that prints html tree
 indent :: Int -> String
@@ -23,7 +25,7 @@ printAttrs attrs = if null attrs then "" else " " ++ unwords (map printAttr attr
 printHtmlTree :: Int -> HtmlTree -> IO ()
 printHtmlTree level (Text content) = do 
     putStr $ indent level ++ "Text: " 
-    LBS.putStr $ TE.encodeUtf8 $  T.pack content 
+    LBS.putStr $ TE.encodeUtf8 $ T.pack $ unescape content 
     putStr "\n"
 printHtmlTree level (HtmlTag tagType attrs children) =
     let openingTag = tagType ++ printAttrs attrs
@@ -33,6 +35,16 @@ printHtmlTree level (HtmlTag tagType attrs children) =
 
 printHtml :: HtmlTree -> IO ()
 printHtml = printHtmlTree 0
+
+unescape :: String -> String
+unescape [] = []
+unescape ('\\':xs) = 
+  let (numStr, rest) = span isDigit xs
+      codePoint = case numStr of
+                    "" -> '\\'
+                    _  -> chr (fst (head (readDec numStr)))
+  in codePoint : unescape rest
+unescape (x:xs) = x : unescape xs
 
 main :: IO ()
 main = do
@@ -45,5 +57,6 @@ main = do
     request <- parseRequest url
     response <- httpLbs request manager
     let html = TE.decodeUtf8 $ LBS.toStrict $ S.getResponseBody response
+    print html
     putStrLn "=== Tree ==="
     printHtml $ createTree $ show html
