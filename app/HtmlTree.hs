@@ -41,7 +41,7 @@ parseAttr = (fst &&& parseAttrList . splitOn "\"" . snd) . break isSpace
 parseAttrList :: [String] -> [TagAttr]
 parseAttrList [] = []
 parseAttrList [_] = []
-parseAttrList (x:y:zs) = TagAttr (removeFirstLast x) y : parseAttrList zs
+parseAttrList (x:y:zs) = TagAttr (init $ removeFirstLast x) (init y) : parseAttrList zs
 
 removeFirstLast :: String -> String
 removeFirstLast = tail . init
@@ -52,11 +52,18 @@ parseText :: String -> [HtmlTree] -> String -> ([HtmlTree], String)
 parseText [] children _ = (children, [])
 parseText (x:xs) children text 
     | x == '<' = if head xs == '/'
-        then (children ++ [Text text | not (all isSpace text)], removeTag xs)
+        then (children ++ [Text text | not (allSpaceUtf8 text)], removeTag xs)
         else let
             (child, remaining) = parseTag xs
             in parseText remaining (children++[child]) ""
     | otherwise = parseText xs children (text++[x])
+
+allSpaceUtf8 :: String -> Bool
+allSpaceUtf8 [] = True
+allSpaceUtf8 ('\\':'n':zs) = allSpaceUtf8 zs
+allSpaceUtf8 ('\\':'t':zs) = allSpaceUtf8 zs
+allSpaceUtf8 (' ':zs) = allSpaceUtf8 zs
+allSpaceUtf8 _ = False
 
 parseTag :: String -> (HtmlTree, String)
 parseTag xs

@@ -40,7 +40,5 @@ main = do
     request <- parseRequest url
     response <- httpLbs request manager
     let html = TE.decodeUtf8 $ LBS.toStrict $ S.getResponseBody response
-    putStr $ show html
-    --
-    --putStrLn "=== Tree ==="
-    --printHtml $ createTree html
+    putStrLn "=== Tree ==="
+    printHtml $ createTree $ show html
