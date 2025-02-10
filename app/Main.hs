@@ -2,18 +2,10 @@ module Main where
 
 {-# LANGUAGE OverloadedStrings #-}
 
--- Network
-import qualified Network.HTTP.Simple as S
-import Network.HTTP.Client.TLS 
-import Network.HTTP.Client
-
--- Text encoding
-import qualified Data.Text.Encoding as TE
-import qualified Data.ByteString as LBS
-
 -- Project modules
 import HtmlTree
 import TUI
+import FetchHtml
 
 -- Other imports
 import System.IO (hFlush, stdout)
@@ -25,12 +17,9 @@ main = do
     hFlush stdout
     url <- getLine
 
-    -- Fetch HTML content
-    manager <- newManager tlsManagerSettings
-    request <- parseRequest url
-    response <- httpLbs request manager
-    let html = TE.decodeUtf8 $ LBS.toStrict $ S.getResponseBody response
-    
+    -- Fetch Html
+    html <- fetch url
+        
     -- Print Tree
     putStrLn "=== Tree ==="
-    printHtml $ createTree $ show html
+    printHtml $ createTree html
