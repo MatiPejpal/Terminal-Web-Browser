@@ -84,10 +84,10 @@ parseHTML = parseTag . drop 1 . dropWhile (/= '<')
 createTree :: String -> HtmlTree
 createTree = fst . parseHTML . removeTag
 
--- Find and return body of HtmlTree
-findBody :: HtmlTree -> Maybe HtmlTree
-findBody (Text _) = Nothing
-findBody body@(HtmlTag tagType _ children)
-    | tagType == "body" = Just body
-    | otherwise = msum $ map findBody children
+-- Find and return tag of HtmlTree
+findTag :: String -> HtmlTree -> Maybe HtmlTree
+findTag _ (Text _) = Nothing
+findTag tagName body@(HtmlTag tagType _ children)
+    | tagType == tagName = Just body
+    | otherwise = msum $ map (findTag tagName) children
 

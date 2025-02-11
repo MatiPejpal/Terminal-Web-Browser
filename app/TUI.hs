@@ -16,7 +16,7 @@ import System.Console.ANSI
 updateScreen :: HtmlTree -> IO ()
 updateScreen tree = do
     clearScreen
-    let body = findBody tree
+    let body = findTag "body" tree
     case body of
         Just b -> putStrLn $ printBody b
         Nothing -> putStrLn "Error"
@@ -49,6 +49,7 @@ printHtml = printHtmlTree 0
 -- Turns substrings of encoded characters onto actual characters
 unescape :: String -> String
 unescape [] = []
+unescape ('\\':'n':xs) = unescape xs
 unescape ('\\':xs) = 
   let (numStr, rest) = span isDigit xs
       codePoint = case numStr of
@@ -59,7 +60,7 @@ unescape (x:xs) = x : unescape xs
 
 -- Returns a String that is layout of the Body
 printBody :: HtmlTree -> String
-printBody (Text text) = unescape text ++ "\n"
+printBody (Text text) = unescape text
 printBody (HtmlTag tag attr children) = 
     let layout = concatMap printBody children
     in if isBlockTag tag
@@ -70,8 +71,6 @@ printBody (HtmlTag tag attr children) =
     isBlockTag "p" = True
     isBlockTag "div" = True
     isBlockTag "h1" = True
-    isBlockTag "ul" = True
-    isBlockTag "li" = True
     isBlockTag "br" = True  -- Special case for line breaks
     isBlockTag _ = False
 
