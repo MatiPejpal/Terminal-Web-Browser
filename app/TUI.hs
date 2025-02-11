@@ -11,6 +11,16 @@ import HtmlTree
 -- Other imports
 import Data.Char (chr, isDigit)
 import Numeric (readDec)
+import System.Console.ANSI 
+
+updateScreen :: HtmlTree -> IO ()
+updateScreen tree = do
+    clearScreen
+    let body = findBody tree
+    case body of
+        Just b -> putStrLn $ printBody b
+        Nothing -> putStrLn "Error"
+
 
 -- Function that prints html tree
 indent :: Int -> String
@@ -47,4 +57,21 @@ unescape ('\\':xs) =
   in codePoint : unescape rest
 unescape (x:xs) = x : unescape xs
 
+-- Returns a String that is layout of the Body
+printBody :: HtmlTree -> String
+printBody (Text text) = unescape text ++ "\n"
+printBody (HtmlTag tag attr children) = 
+    let layout = concatMap printBody children
+    in if isBlockTag tag
+       then layout ++ "\n"
+       else layout
+    where
+    -- Define block-level tags that need line breaks
+    isBlockTag "p" = True
+    isBlockTag "div" = True
+    isBlockTag "h1" = True
+    isBlockTag "ul" = True
+    isBlockTag "li" = True
+    isBlockTag "br" = True  -- Special case for line breaks
+    isBlockTag _ = False
 

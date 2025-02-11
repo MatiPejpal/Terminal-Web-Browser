@@ -3,6 +3,7 @@ module HtmlTree where
 import Control.Arrow ((&&&))
 import Data.Char (isSpace)
 import Data.List.Split
+import Control.Monad (msum)
 
 data HtmlTree
     = Text { content :: String }
@@ -82,4 +83,11 @@ parseHTML = parseTag . drop 1 . dropWhile (/= '<')
 
 createTree :: String -> HtmlTree
 createTree = fst . parseHTML . removeTag
+
+-- Find and return body of HtmlTree
+findBody :: HtmlTree -> Maybe HtmlTree
+findBody (Text _) = Nothing
+findBody body@(HtmlTag tagType _ children)
+    | tagType == "body" = Just body
+    | otherwise = msum $ map findBody children
 

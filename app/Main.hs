@@ -20,6 +20,8 @@ main = do
     -- Fetch Html
     html <- fetch url
         
-    -- Print Tree
-    putStrLn "=== Tree ==="
-    printHtml $ createTree html
+    -- Print Web Page
+    let tree = createTree html
+    updateScreen tree
+
+
