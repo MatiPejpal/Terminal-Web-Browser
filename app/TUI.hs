@@ -63,17 +63,15 @@ unescape (x:xs) = x : unescape xs
 
 -- Returns a String that is layout of the Body
 printTag :: HtmlTree -> String
-printTag (Text text) = unescape text
+printTag (Text text) = unescape text ++ " "
 printTag (HtmlTag tag attr children) = 
     let layout = concatMap printTag children
-    in if isBlockTag tag
-       then layout ++ "\n\n"
-       else layout
-    where
-    -- Define block-level tags that need line breaks
-    isBlockTag "p" = True
-    isBlockTag "div" = True
-    isBlockTag "h1" = True
-    isBlockTag "br" = True  -- Special case for line breaks
-    isBlockTag _ = False
+    in layout ++ appendix tag
+    where 
+    -- define tag behaviour
+    appendix "p" = "\n\n"
+    appendix "div" = "\n\n"
+    appendix "h1" = "\n\n"
+    appendix "br" = "\n\n"
+    appendix _ = ""
 
