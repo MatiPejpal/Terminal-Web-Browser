@@ -80,7 +80,18 @@ parseTag xs
     | otherwise = (HtmlTag tagType attrs children, remaining2)
   where
     (tagType, remaining, selfClose, attrs) = parseTagType xs []
-    (children, remaining2) = if selfClose then ([], remaining) else parseText remaining [] ""
+    (children, remaining2) = if selfClose 
+        then ([], remaining) 
+        else case tagType of 
+            "code" -> parseAsText remaining ""
+            "script" -> parseAsText remaining ""
+            _ ->  parseText remaining [] ""
+
+-- parse as text
+parseAsText :: String -> String -> ([HtmlTree], String)
+parseAsText [] text = ([Text text], "")
+parseAsText ('<':'/':zs) text = ([Text text], removeTag zs) 
+parseAsText (x:xs) text = parseAsText xs (text ++ [x])
 
 -- removes everything until end of tag
 removeTag :: String -> String
