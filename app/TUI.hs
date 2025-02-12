@@ -9,8 +9,6 @@ import qualified Data.ByteString as LBS
 import HtmlTree
 
 -- Other imports
-import Data.Char (chr, isDigit)
-import Numeric (readDec)
 import System.Console.ANSI 
 
 updateScreen :: HtmlTree -> IO ()
@@ -19,10 +17,11 @@ updateScreen tree = do
     setCursorPosition 0 0
     let tag = findTag "main" tree
     case tag of
-        Just b -> do 
-            putStrLn $ printTag b
---            printHtml b
-        Nothing -> putStrLn "Error"
+        Just t -> putStrLn $ printTag t
+        Nothing -> let body = findTag "body" tree
+                in case body of
+                    Just b -> putStrLn $ printTag b
+                    Nothing -> putStrLn "===Error==="
 
 
 -- Function that prints html tree
