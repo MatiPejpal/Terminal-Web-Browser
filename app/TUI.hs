@@ -16,9 +16,12 @@ import System.Console.ANSI
 updateScreen :: HtmlTree -> IO ()
 updateScreen tree = do
     clearScreen
-    let body = findTag "body" tree
-    case body of
-        Just b -> putStrLn $ printBody b
+    setCursorPosition 0 0
+    let tag = findTag "main" tree
+    case tag of
+        Just b -> do 
+            putStrLn $ printTag b ++ "\n\n===Tree==="
+            printHtml b
         Nothing -> putStrLn "Error"
 
 
@@ -59,12 +62,12 @@ unescape ('\\':xs) =
 unescape (x:xs) = x : unescape xs
 
 -- Returns a String that is layout of the Body
-printBody :: HtmlTree -> String
-printBody (Text text) = unescape text
-printBody (HtmlTag tag attr children) = 
-    let layout = concatMap printBody children
+printTag :: HtmlTree -> String
+printTag (Text text) = unescape text
+printTag (HtmlTag tag attr children) = 
+    let layout = concatMap printTag children
     in if isBlockTag tag
-       then layout ++ "\n"
+       then layout ++ "\n\n"
        else layout
     where
     -- Define block-level tags that need line breaks
