@@ -49,21 +49,10 @@ printHtmlTree level (HtmlTag tagType attrs children) =
 printHtml :: HtmlTree -> IO ()
 printHtml = printHtmlTree 0
 
--- Turns substrings of encoded characters onto actual characters
-unescape :: String -> String
-unescape [] = []
-unescape ('\\':'n':xs) = unescape xs
-unescape ('\\':xs) = 
-  let (numStr, rest) = span isDigit xs
-      codePoint = case numStr of
-                    "" -> '\\'
-                    _  -> chr (fst (head (readDec numStr)))
-  in codePoint : unescape rest
-unescape (x:xs) = x : unescape xs
 
 -- Returns a String that is layout of the Body
 printTag :: HtmlTree -> String
-printTag (Text text) = unescape text ++ " "
+printTag (Text text) = text ++ " "
 printTag (HtmlTag tag attr children) = 
     let layout = concatMap printTag children
     in layout ++ appendix tag

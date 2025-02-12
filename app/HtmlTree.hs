@@ -1,9 +1,13 @@
 module HtmlTree where
 
 import Control.Arrow ((&&&))
-import Data.Char (isSpace)
 import Data.List.Split
 import Control.Monad (msum)
+
+-- Other imports
+import Data.Char (chr, isDigit, isSpace)
+import Numeric (readDec)
+
 
 data HtmlTree
     = Text { content :: String }
@@ -53,10 +57,10 @@ parseText :: String -> [HtmlTree] -> String -> ([HtmlTree], String)
 parseText [] children _ = (children, [])
 parseText (x:xs) children text 
     | x == '<' = if head xs == '/'
-        then (children ++ [Text $ removeWhiteSpace text | not (allSpaceUtf8 text)], removeTag xs)
+        then (children ++ [Text $ removeWhiteSpace $ unescape text | not (allSpaceUtf8 text)], removeTag xs)
         else let
             (child, remaining) = parseTag xs
-            in parseText remaining (children++[Text $ removeWhiteSpace text, child]) ""
+            in parseText remaining (children++[Text $ removeWhiteSpace $ unescape text, child]) ""
     | otherwise = parseText xs children (text++[x])
 
 -- Checks whether String consists only of whiteSpace
@@ -109,4 +113,18 @@ findTag _ (Text _) = Nothing
 findTag tagName body@(HtmlTag tagType _ children)
     | tagType == tagName = Just body
     | otherwise = msum $ map (findTag tagName) children
+
+-- Turns substrings of encoded characters onto actual characters
+unescape :: String -> String
+unescape [] = []
+unescape ('\\':'n':xs) = unescape xs
+unescape ('\\':'t':xs) = unescape xs
+unescape ('\\':xs) = 
+  let (numStr, rest) = span isDigit xs
+      codePoint = case numStr of
+                    "" -> '\\'
+                    _  -> chr (fst (head (readDec numStr)))
+  in codePoint : unescape rest
+unescape (x:xs) = x : unescape xs
+
 
