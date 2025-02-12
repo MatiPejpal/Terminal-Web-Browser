@@ -21,7 +21,7 @@ updateScreen tree = do
     case tag of
         Just b -> do 
             putStrLn $ printTag b ++ "\n\n===Tree==="
-            printHtml b
+--            printHtml b
         Nothing -> putStrLn "Error"
 
 

@@ -56,7 +56,7 @@ parseText (x:xs) children text
         then (children ++ [Text text | not (allSpaceUtf8 text)], removeTag xs)
         else let
             (child, remaining) = parseTag xs
-            in parseText remaining (children++[child]) ""
+            in parseText remaining (children++[Text text, child]) ""
     | otherwise = parseText xs children (text++[x])
 
 allSpaceUtf8 :: String -> Bool
