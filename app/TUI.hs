@@ -20,7 +20,7 @@ updateScreen tree = do
     let tag = findTag "main" tree
     case tag of
         Just b -> do 
-            putStrLn $ printTag b ++ "\n\n===Tree==="
+            putStrLn $ printTag b
 --            printHtml b
         Nothing -> putStrLn "Error"
 

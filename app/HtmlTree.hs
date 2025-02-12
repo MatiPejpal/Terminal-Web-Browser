@@ -53,18 +53,26 @@ parseText :: String -> [HtmlTree] -> String -> ([HtmlTree], String)
 parseText [] children _ = (children, [])
 parseText (x:xs) children text 
     | x == '<' = if head xs == '/'
-        then (children ++ [Text text | not (allSpaceUtf8 text)], removeTag xs)
+        then (children ++ [Text $ removeWhiteSpace text | not (allSpaceUtf8 text)], removeTag xs)
         else let
             (child, remaining) = parseTag xs
-            in parseText remaining (children++[Text text, child]) ""
+            in parseText remaining (children++[Text $ removeWhiteSpace text, child]) ""
     | otherwise = parseText xs children (text++[x])
 
+-- Checks whether String consists only of whiteSpace
 allSpaceUtf8 :: String -> Bool
 allSpaceUtf8 [] = True
 allSpaceUtf8 ('\\':'n':zs) = allSpaceUtf8 zs
 allSpaceUtf8 ('\\':'t':zs) = allSpaceUtf8 zs
 allSpaceUtf8 (' ':zs) = allSpaceUtf8 zs
 allSpaceUtf8 _ = False
+
+-- removes white space in front and at the end of string
+removeWhiteSpace :: String -> String
+removeWhiteSpace s = let 
+    frontDrop = dropWhile isSpace s
+    backDrop = dropWhile isSpace (reverse frontDrop)
+    in reverse backDrop
 
 parseTag :: String -> (HtmlTree, String)
 parseTag xs
