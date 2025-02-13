@@ -8,7 +8,8 @@ import TUI
 import FetchHtml
 
 -- Other imports
-import System.IO (hFlush, stdout)
+import System.Console.ANSI (showCursor)
+import System.IO
 
 main :: IO ()
 main = do
@@ -31,9 +32,19 @@ appLoop ts = do
     updateScreen ts
     input <- getChar
     case input of 
-        'k' -> appLoop ts { line = line ts+1 }
-        'j' -> appLoop ts { line = line ts-1 }
+        'k' -> appLoop ts { line = line ts-1 }
+        'j' -> appLoop ts { line = line ts+1 }
         'q' -> clearTUI >> putStrLn "Thank you"
+        '>' -> do 
+            clearTUI
+            putChar '>'
+            hFlush stdout
+            url <- getLine
+            htmlContent <- fetch url
+            let tree = createTree htmlContent
+            loadTUI
+            appLoop ts { html = Just tree, line = 0 }
+
         _ -> appLoop ts
 
     

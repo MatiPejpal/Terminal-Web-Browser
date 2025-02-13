@@ -4,7 +4,6 @@ module TUI where
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as LBS
-import System.Console.ANSI
 import System.IO
 
 -- Proejct modules
