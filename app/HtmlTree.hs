@@ -2,6 +2,7 @@ module HtmlTree where
 
 import Control.Arrow ((&&&))
 import Data.List.Split
+import Data.List (isPrefixOf)
 import Control.Monad (msum)
 
 -- Other imports
@@ -87,15 +88,17 @@ parseTag xs
     (children, remaining2) = if selfClose 
         then ([], remaining) 
         else case tagType of 
-            "code" -> parseAsText remaining ""
-            "script" -> parseAsText remaining ""
+            "code" -> parseAsText remaining "code" ""
+            "script" -> parseAsText remaining "script" ""
             _ ->  parseText remaining [] ""
 
 -- parse as text
-parseAsText :: String -> String -> ([HtmlTree], String)
-parseAsText [] text = ([Text text], "")
-parseAsText ('<':'/':zs) text = ([Text text], removeTag zs) 
-parseAsText (x:xs) text = parseAsText xs (text ++ [x])
+parseAsText :: String -> String -> String -> ([HtmlTree], String)
+parseAsText [] _ text = ([Text text], "")
+parseAsText ('<':'/':zs) prefix text = if prefix `isPrefixOf` zs 
+    then ([Text $ unescape text], removeTag zs) 
+    else  parseAsText zs prefix (text ++ "</")
+parseAsText (x:xs) prefix text  = parseAsText xs prefix (text ++ [x])
 
 -- removes everything until end of tag
 removeTag :: String -> String

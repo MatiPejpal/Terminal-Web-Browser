@@ -51,7 +51,7 @@ printHtml = printHtmlTree 0
 
 -- Returns a String that is layout of the Body
 printTag :: HtmlTree -> String
-printTag (Text text) = text ++ " "
+printTag (Text text) = text
 printTag (HtmlTag tag attr children) = 
     let layout = concatMap printTag children
     in layout ++ appendix tag
