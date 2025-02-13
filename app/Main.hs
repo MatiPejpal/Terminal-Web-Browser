@@ -3,12 +3,10 @@ module Main where
 {-# LANGUAGE OverloadedStrings #-}
 
 -- Project modules
-import HtmlTree
 import TUI
 import FetchHtml
 
 -- Other imports
-import System.Console.ANSI (showCursor)
 import System.IO
 
 main :: IO ()
@@ -19,13 +17,11 @@ main = do
     url <- getLine
 
     -- Fetch Html
-    htmlContent <- fetch url
+    ts <- fetch url
         
     -- Print Web Page
-    let its = initialTuiState
-    let tree = createTree htmlContent
     loadTUI
-    appLoop its { html = Just tree }
+    appLoop ts
 
 appLoop :: TuiState -> IO ()
 appLoop ts = do 
@@ -40,11 +36,9 @@ appLoop ts = do
             putChar '>'
             hFlush stdout
             url <- getLine
-            htmlContent <- fetch url
-            let tree = createTree htmlContent
+            newTs <- fetch url
             loadTUI
-            appLoop ts { html = Just tree, line = 0 }
-
+            appLoop newTs
         _ -> appLoop ts
 
     
