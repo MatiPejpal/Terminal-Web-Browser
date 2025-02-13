@@ -60,6 +60,11 @@ printTag (HtmlTag tag attr children) =
     appendix "p" = "\n\n"
     appendix "div" = "\n\n"
     appendix "h1" = "\n\n"
+    appendix "h2" = "\n\n"
+    appendix "h3" = "\n\n"
+    appendix "h4" = "\n\n"
+    appendix "h5" = "\n\n"
+    appendix "h6" = "\n\n"
     appendix "br" = "\n\n"
     appendix _ = ""
 
