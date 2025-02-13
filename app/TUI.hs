@@ -4,24 +4,54 @@ module TUI where
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as LBS
+import System.Console.ANSI
+import System.IO
 
 -- Proejct modules
 import HtmlTree
 
 -- Other imports
 import System.Console.ANSI 
+import System.IO (hSetBuffering, BufferMode (NoBuffering), stdout)
 
-updateScreen :: HtmlTree -> IO ()
-updateScreen tree = do
+-- Define TUIStatate
+data TuiState = TuiState {
+    html :: Maybe HtmlTree,
+    layout :: Maybe String,
+    line :: Int,
+    mode :: Int,
+    command :: Maybe String
+    }
+
+initialTuiState :: TuiState
+initialTuiState = TuiState Nothing Nothing 0 0 Nothing
+
+loadTUI :: IO ()
+loadTUI = do
     clearScreen
-    setCursorPosition 0 0
-    let tag = findTag "main" tree
-    case tag of
-        Just t -> putStrLn $ printTag t
-        Nothing -> let body = findTag "body" tree
-                in case body of
-                    Just b -> putStrLn $ printTag b
-                    Nothing -> putStrLn "===Error==="
+    hSetEcho stdin False
+    hSetBuffering stdin NoBuffering
+    hideCursor
+
+clearTUI :: IO ()
+clearTUI = do
+    hSetEcho stdin True
+    hSetBuffering stdin LineBuffering
+    showCursor
+
+updateScreen :: TuiState -> IO ()
+updateScreen state = case html state of
+    Nothing -> putStrLn "No website fetched."
+    Just tree -> do
+        clearScreen
+        setCursorPosition 0 0
+        let tag = findTag "main" tree 
+        case tag of
+            Just t -> mapM_ putStrLn (take 10 $ drop (line state) $ lines $ printTag t)
+            Nothing -> let body = findTag "body" tree
+                    in case body of
+                        Just b -> putStrLn $ printTag b ++ ['\r']
+                        Nothing -> putStrLn "===Error==="
 
 
 -- Function that prints html tree

@@ -18,10 +18,24 @@ main = do
     url <- getLine
 
     -- Fetch Html
-    html <- fetch url
+    htmlContent <- fetch url
         
     -- Print Web Page
-    let tree = createTree html
-    updateScreen tree
+    let its = initialTuiState
+    let tree = createTree htmlContent
+    loadTUI
+    appLoop its { html = Just tree }
+
+appLoop :: TuiState -> IO ()
+appLoop ts = do 
+    updateScreen ts
+    input <- getChar
+    case input of 
+        'k' -> appLoop ts { line = line ts+1 }
+        'j' -> appLoop ts { line = line ts-1 }
+        'q' -> clearTUI >> putStrLn "Thank you"
+        _ -> appLoop ts
+
+    
 
 
