@@ -23,6 +23,7 @@ data TuiState = TuiState {
 initialTuiState :: TuiState
 initialTuiState = TuiState Nothing Nothing [] 0 
 
+-- Load terminal settings
 loadTUI :: IO ()
 loadTUI = do
     clearScreen
@@ -30,6 +31,7 @@ loadTUI = do
     hSetBuffering stdin NoBuffering
     hideCursor
 
+-- Load orginal terminal settings
 clearTUI :: IO ()
 clearTUI = do
     hSetEcho stdin True

@@ -31,7 +31,12 @@ appLoop ts = do
         'k' -> appLoop ts { line = line ts-1 }
         'j' -> appLoop ts { line = line ts+1 }
         'q' -> clearTUI >> putStrLn "Thank you"
-        '>' -> do 
+        '>' -> loadNewPage
+        _ -> appLoop ts
+
+-- Ask user for new url, then fetch this url and display page
+loadNewPage :: IO ()
+loadNewPage =  do 
             clearTUI
             putChar '>'
             hFlush stdout
@@ -39,8 +44,7 @@ appLoop ts = do
             newTs <- fetch url
             loadTUI
             appLoop $ loadTUIState newTs
-        _ -> appLoop ts
 
-    
+
 
 
