@@ -46,10 +46,10 @@ loadTUIState ts =
         Just tree -> do
             let tag = findTag "main" tree 
             case tag of
-                Just t -> ts {layout = Just $ printTag t}
+                Just t -> ts {layout = Just $ printTag $ numberTreeLinks t}
                 Nothing -> let body = findTag "body" tree
                         in case body of
-                            Just b -> ts { layout = Just $ printTag b }
+                            Just b -> ts { layout = Just $ printTag $ numberTreeLinks b }
                             Nothing -> ts { layout = Just "===Error==="}
 
 -- Displays current Tuistate onto the terminal
@@ -103,5 +103,36 @@ printTag (HtmlTag tag attr children) =
     appendix "h5" = "\n\n"
     appendix "h6" = "\n\n"
     appendix "br" = "\n\n"
+    appendix "a" = "[" ++ show (extractLinkNum attr) ++ "]"
     appendix _ = ""
+
+-- number each link in tree
+numberTreeLinks :: HtmlTree -> HtmlTree
+numberTreeLinks tree = fst $ numberLinks tree 1
+
+numberLinks :: HtmlTree -> Int -> (HtmlTree, Int)
+numberLinks (Text t) linkNum = (Text t, linkNum)
+numberLinks htag@(HtmlTag tag attr children) linkNum = if tag == "a"
+    then (HtmlTag tag (attr++[TagAttr "link-number" $ show linkNum]) children, linkNum + 1)
+    else let 
+        (c, l) = numberLinksAux children linkNum
+        in (htag {htmlchildren = c}, l)
+
+numberLinksAux :: [HtmlTree] -> Int -> ([HtmlTree], Int)
+numberLinksAux [] linkNum = ([], linkNum)
+numberLinksAux (x:xs) linkNum = let 
+    (tree, ln) = numberLinks x linkNum
+    (trees, lns) = numberLinksAux xs ln
+    in (tree:trees, lns)
+
+extractLinkNum :: [TagAttr] -> Int
+extractLinkNum [] = -1
+extractLinkNum (x:xs) = if attrName x == "link-number"
+    then read (attrVal x) :: Int
+    else extractLinkNum xs
+
+
+
+
+ 
 
