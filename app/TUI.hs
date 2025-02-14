@@ -4,26 +4,24 @@ module TUI where
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as LBS
-import System.IO
 
 -- Proejct modules
 import HtmlTree
 
 -- Other imports
 import System.Console.ANSI 
-import System.IO (hSetBuffering, BufferMode (NoBuffering), stdout)
+import System.IO (hSetBuffering, BufferMode (NoBuffering, LineBuffering), stdin, hSetEcho)
 
 -- Define TUIStatate
 data TuiState = TuiState {
     html :: Maybe HtmlTree,
     layout :: Maybe String,
-    line :: Int,
-    mode :: Int,
-    command :: Maybe String
+    links :: [(Int, String)],
+    line :: Int
     }
 
 initialTuiState :: TuiState
-initialTuiState = TuiState Nothing Nothing 0 0 Nothing
+initialTuiState = TuiState Nothing Nothing [] 0 
 
 loadTUI :: IO ()
 loadTUI = do
@@ -38,21 +36,29 @@ clearTUI = do
     hSetBuffering stdin LineBuffering
     showCursor
 
+-- Loads TuiState, based of html tree produces layout
+loadTUIState :: TuiState -> TuiState
+loadTUIState ts = 
+    case html ts of
+        Nothing -> ts
+        Just tree -> do
+            let tag = findTag "main" tree 
+            case tag of
+                Just t -> ts {layout = Just $ printTag t}
+                Nothing -> let body = findTag "body" tree
+                        in case body of
+                            Just b -> ts { layout = Just $ printTag b }
+                            Nothing -> ts { layout = Just "===Error==="}
+
+-- Displays current Tuistate onto the terminal
 updateScreen :: TuiState -> IO ()
-updateScreen state = case html state of
-    Nothing -> putStrLn "No website fetched."
-    Just tree -> do
+updateScreen state = case layout state of
+    Nothing -> putStrLn "No layout found"
+    Just l -> do 
         clearScreen
         setCursorPosition 0 0
-        let tag = findTag "main" tree 
-        case tag of
-            Just t -> mapM_ putStrLn (take 10 $ drop (line state) $ lines $ printTag t)
-            Nothing -> let body = findTag "body" tree
-                    in case body of
-                        Just b -> putStrLn $ printTag b ++ ['\r']
-                        Nothing -> putStrLn "===Error==="
-
-
+        mapM_ putStrLn (take 25 $ drop (line state) $ lines l)
+               
 -- Function that prints html tree
 indent :: Int -> String
 indent n = replicate (n * 2) ' '

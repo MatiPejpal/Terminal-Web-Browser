@@ -21,7 +21,7 @@ main = do
         
     -- Print Web Page
     loadTUI
-    appLoop ts
+    appLoop $ loadTUIState ts
 
 appLoop :: TuiState -> IO ()
 appLoop ts = do 
@@ -38,7 +38,7 @@ appLoop ts = do
             url <- getLine
             newTs <- fetch url
             loadTUI
-            appLoop newTs
+            appLoop $ loadTUIState newTs
         _ -> appLoop ts
 
     
