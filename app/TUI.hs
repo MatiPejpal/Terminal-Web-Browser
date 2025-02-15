@@ -46,10 +46,16 @@ loadTUIState ts =
         Just tree -> do
             let tag = findTag "main" tree 
             case tag of
-                Just t -> ts {layout = Just $ printTag $ numberTreeLinks t}
+                Just t -> do 
+                    let newTree = numberTreeLinks t
+                    let newLinks = gatherLinks newTree
+                    ts {layout = Just $ printTag newTree, links = newLinks}
                 Nothing -> let body = findTag "body" tree
                         in case body of
-                            Just b -> ts { layout = Just $ printTag $ numberTreeLinks b }
+                            Just b -> do 
+                                let newTree = numberTreeLinks b
+                                let newLinks = gatherLinks newTree
+                                ts {layout = Just $ printTag newTree, links = newLinks}
                             Nothing -> ts { layout = Just "===Error==="}
 
 -- Displays current Tuistate onto the terminal
@@ -131,8 +137,23 @@ extractLinkNum (x:xs) = if attrName x == "link-number"
     then read (attrVal x) :: Int
     else extractLinkNum xs
 
+-- Loads links into tui state
+loadLinks :: TuiState -> TuiState
+loadLinks ts = case html ts of 
+    Just a -> ts { links = gatherLinks a }
+    Nothing -> ts
 
+gatherLinks :: HtmlTree -> [(Int, String)]
+gatherLinks (Text _) = []
+gatherLinks (HtmlTag tag attr children) = if tag == "a"
+    then [(extractLinkNum attr, extractLinkHref attr)]
+    else concatMap gatherLinks children
 
+extractLinkHref :: [TagAttr] -> String
+extractLinkHref [] = ""
+extractLinkHref (x:xs) = if attrName x == "href"
+    then attrVal x
+    else extractLinkHref xs
 
  
 
