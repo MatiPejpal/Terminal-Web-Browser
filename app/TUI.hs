@@ -11,6 +11,7 @@ import HtmlTree
 -- Other imports
 import System.Console.ANSI 
 import System.IO (hSetBuffering, BufferMode (NoBuffering, LineBuffering), stdin, hSetEcho)
+import Text.ParserCombinators.ReadP (look)
 
 -- Define TUIStatate
 data TuiState = TuiState {
@@ -155,5 +156,7 @@ extractLinkHref (x:xs) = if attrName x == "href"
     then attrVal x
     else extractLinkHref xs
 
- 
+-- given intiger returns corresponding link from tuiState links
+getLink :: Int -> TuiState -> Maybe String
+getLink num ts = lookup num (links ts)
 
